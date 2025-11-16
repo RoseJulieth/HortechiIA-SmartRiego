@@ -1,0 +1,23 @@
+<resources>
+    <string name="nav_inicio">Inicio</string>
+    <string name="nav_historial">Historial</string>
+    <string name="nav_control">Control</string>
+    <string name="nav_programar">Programar</string>
+    <string name="nav_mas">Más</string>
+    <string name="logo_text">H</string>
+    <string name="app_name">SmartRiego IoT</string>
+    <string name="hortechia">HORTECHIA</string>
+    <string name="version">v1.0</string>
+    <string name="bienvenido">Bienvenido a SmartRiego</string>
+    <string name="email">Email o Usuario</string>
+    <string name="password">Contraseña</string>
+    <string name="login">Iniciar Sesión</string>
+    <string name="recordar">Recordar sesión</string>
+    <string name="mi_jardin">Mi Jardín</string>
+    <string name="sistema_conectado">Sistema conectado</string>
+    <string name="actualizado">Actualizado hace 2 min</string>
+    <string name="control_manual">Control Manual</string>
+    <string name="historial">Historial</string>
+    <string name="programacion">Programación Automática</string>
+    <string name="configuracion">Configuración</string>
+</resources>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- SmartRiego Theme Colors -->
+    <color name="primary_green">#4CAF50</color>
+    <color name="secondary_green">#8BC34A</color>
+    <color name="background">#FFFFFF</color>
+    <color name="surface">#F5F5F5</color>
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+
+    <!-- Status Colors -->
+    <color name="status_active">#4CAF50</color>
+    <color name="status_warning">#FF9800</color>
+    <color name="status_danger">#F44336</color>
+    <color name="status_inactive">#9E9E9E</color>
+
+    <!-- Component Colors -->
+    <color name="card_background">#FFFFFF</color>
+    <color name="divider">#E0E0E0</color>
+</resources>

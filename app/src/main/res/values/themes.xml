@@ -1,9 +1,47 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.HortechIASmartRiego" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    <style name="Base.Theme.HortechIA" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/verde_primary</item>
+        <item name="colorPrimaryVariant">@color/verde_primary_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+
+        <item name="colorSecondary">@color/verde_accent</item>
+        <item name="colorSecondaryVariant">@color/verde_light</item>
+        <item name="colorOnSecondary">@color/white</item>
+
+        <item name="colorSurface">@color/fondo_blanco</item>
+        <item name="colorOnSurface">@color/texto_principal</item>
+
+        <item name="android:colorBackground">@color/fondo_gris_claro</item>
+        <item name="colorOnBackground">@color/texto_principal</item>
+
+        <item name="android:statusBarColor">@color/verde_primary</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 
-    <style name="Theme.HortechIASmartRiego" parent="Base.Theme.HortechIASmartRiego" />
+    <style name="Theme.HortechIA" parent="Base.Theme.HortechIA" />
+
+    <style name="Theme.HortechIA.Splash" parent="Theme.HortechIA">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+
+    <style name="Widget.HortechIA.Button" parent="Widget.Material3.Button">
+        <item name="android:textColor">@color/white</item>
+        <item name="backgroundTint">@color/verde_primary</item>
+        <item name="cornerRadius">@dimen/button_corner_radius</item>
+        <item name="android:minHeight">@dimen/button_height</item>
+    </style>
+
+    <style name="Widget.HortechIA.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:textColor">@color/verde_primary</item>
+        <item name="strokeColor">@color/verde_primary</item>
+        <item name="cornerRadius">@dimen/button_corner_radius</item>
+    </style>
+
+    <style name="Widget.HortechIA.CardView" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">@dimen/card_corner_radius</item>
+        <item name="cardElevation">@dimen/card_elevation</item>
+        <item name="cardBackgroundColor">@color/card_background</item>
+    </style>
 </resources>

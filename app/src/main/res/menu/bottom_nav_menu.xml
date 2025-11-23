@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
     <item
         android:id="@+id/nav_home"
-        android:icon="@android:drawable/ic_dialog_info"
-        android:title="Inicio"/>
+        android:icon="@drawable/ic_nav_home"
+        android:title="@string/nav_home" />
+
     <item
-        android:id="@+id/nav_historial"
-        android:icon="@android:drawable/ic_menu_sort_by_size"
-        android:title="Historial"/>
+        android:id="@+id/nav_irrigation"
+        android:icon="@drawable/ic_nav_irrigation"
+        android:title="@string/nav_irrigation" />
+
     <item
-        android:id="@+id/nav_control"
-        android:icon="@android:drawable/ic_menu_preferences"
-        android:title="Control"/>
+        android:id="@+id/nav_history"
+        android:icon="@drawable/ic_nav_history"
+        android:title="@string/nav_history" />
+
     <item
-        android:id="@+id/nav_programar"
-        android:icon="@android:drawable/ic_menu_today"
-        android:title="Programar"/>
-    <item
-        android:id="@+id/nav_mas"
-        android:icon="@android:drawable/ic_menu_more"
-        android:title="Más"/>
+        android:id="@+id/nav_settings"
+        android:icon="@drawable/ic_nav_settings"
+        android:title="@string/nav_settings" />
+
 </menu>

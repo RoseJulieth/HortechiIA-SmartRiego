@@ -1,23 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Colores principales de HortechIA -->
+
+    <!-- Verde principal (basado en tu diseño) -->
+    <color name="verde_primary">#4CAF50</color>
+    <color name="verde_primary_dark">#388E3C</color>
+    <color name="verde_light">#81C784</color>
+
+    <!-- Colores de acento -->
+    <color name="verde_accent">#66BB6A</color>
+
+    <!-- Colores de alerta -->
+    <color name="naranja_alerta">#FF9800</color>
+    <color name="rojo_critico">#F44336</color>
+    <color name="amarillo_advertencia">#FFC107</color>
+
+    <!-- Colores de texto -->
+    <color name="texto_principal">#212121</color>
+    <color name="texto_secundario">#757575</color>
+    <color name="texto_hint">#9E9E9E</color>
+
+    <!-- Colores de fondo -->
+    <color name="fondo_blanco">#FFFFFF</color>
+    <color name="fondo_gris_claro">#F5F5F5</color>
+    <color name="fondo_gris">#EEEEEE</color>
+
+    <!-- Colores para tarjetas y elementos -->
+    <color name="card_background">#FFFFFF</color>
+    <color name="divider">#E0E0E0</color>
+
+    <!-- Colores de estado -->
+    <color name="conectado">#4CAF50</color>
+    <color name="desconectado">#F44336</color>
+
+    <!-- Colores básicos de Android (mantener) -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- SmartRiego Theme Colors -->
-    <color name="primary_green">#4CAF50</color>
-    <color name="secondary_green">#8BC34A</color>
-    <color name="background">#FFFFFF</color>
-    <color name="surface">#F5F5F5</color>
-    <color name="text_primary">#212121</color>
-    <color name="text_secondary">#757575</color>
+    <!-- Colores para gráficas -->
+    <color name="grafica_zona1">#FF6B6B</color>
+    <color name="grafica_zona2">#4ECDC4</color>
+    <color name="grafica_linea_umbral">#FFD93D</color>
 
-    <!-- Status Colors -->
-    <color name="status_active">#4CAF50</color>
-    <color name="status_warning">#FF9800</color>
-    <color name="status_danger">#F44336</color>
-    <color name="status_inactive">#9E9E9E</color>
+    <!-- ========================================= -->
+    <!-- ALIAS DE COLORES PARA COMPATIBILIDAD     -->
+    <!-- (Mapean nombres alternativos a colores   -->
+    <!--  ya definidos arriba)                    -->
+    <!-- ========================================= -->
 
-    <!-- Component Colors -->
-    <color name="card_background">#FFFFFF</color>
-    <color name="divider">#E0E0E0</color>
+    <color name="primary_green">@color/verde_primary</color>
+    <color name="surface">@color/fondo_blanco</color>
+    <color name="text_primary">@color/texto_principal</color>
+    <color name="text_secondary">@color/texto_secundario</color>
+    <color name="status_warning">@color/naranja_alerta</color>
+    <color name="status_active">@color/conectado</color>
+    <color name="primary_dark">@color/verde_primary_dark</color>
+    <color name="accent">@color/verde_accent</color>
+
+    <!-- COLORES DE SENSORES -->
+    <color name="sensor_humedad">#2196F3</color>
+    <color name="sensor_temperatura">#FF5722</color>
+
 </resources>

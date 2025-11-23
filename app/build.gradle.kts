@@ -48,9 +48,16 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
+    // Firebase products (sin versiones porque usamos BoM)
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-database")
+    implementation("com.google.firebase:firebase-analytics")
     // TODO: Add the dependencies for Firebase products you want to use
     // When using the BoM, don't specify versions in Firebase dependencies
     implementation("com.google.firebase:firebase-analytics")
     // Add the dependencies for any other desired Firebase products
     // https://firebase.google.com/docs/android/setup#available-libraries
+    // Google Sign-In
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
 }
+apply(plugin = "com.google.gms.google-services")

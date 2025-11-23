@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/margin_medium"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
+    app:strokeWidth="0dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/padding_medium">
+
+        <!-- Icono de la zona -->
+        <ImageView
+            android:id="@+id/ivZoneIcon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_zone_tomato"
+            android:contentDescription="@string/dashboard_title"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:tint="@color/verde_primary" />
+
+        <!-- Nombre de la zona -->
+        <TextView
+            android:id="@+id/tvZoneName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/zone_tomatoes"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/texto_principal"
+            android:layout_marginStart="@dimen/margin_medium"
+            app:layout_constraintTop_toTopOf="@id/ivZoneIcon"
+            app:layout_constraintStart_toEndOf="@id/ivZoneIcon"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Estado -->
+        <LinearLayout
+            android:id="@+id/llStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp"
+            app:layout_constraintTop_toBottomOf="@id/tvZoneName"
+            app:layout_constraintStart_toStartOf="@id/tvZoneName">
+
+            <View
+                android:id="@+id/viewStatusIndicator"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/indicator_active" />
+
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dashboard_active"
+                android:textSize="@dimen/text_size_small"
+                android:textColor="@color/texto_secundario" />
+
+        </LinearLayout>
+
+        <!-- Divisor -->
+        <View
+            android:id="@+id/divider"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="@color/grafica_linea_umbral"
+            android:layout_marginTop="@dimen/margin_medium"
+            app:layout_constraintTop_toBottomOf="@id/ivZoneIcon"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Contenedor de métricas -->
+        <LinearLayout
+            android:id="@+id/llMetrics"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/margin_medium"
+            app:layout_constraintTop_toBottomOf="@id/divider"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <!-- Humedad -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_water_drop"
+                    android:contentDescription="@string/dashboard_humidity"
+                    app:tint="@color/sensor_humedad" />
+
+                <TextView
+                    android:id="@+id/tvHumidity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="45%"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/texto_principal"
+                    android:layout_marginTop="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/dashboard_humidity"
+                    android:textSize="@dimen/text_size_small"
+                    android:textColor="@color/texto_secundario" />
+
+            </LinearLayout>
+
+            <!-- Temperatura -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_temperature"
+                    android:contentDescription="@string/dashboard_temperature"
+                    app:tint="@color/sensor_temperatura" />
+
+                <TextView
+                    android:id="@+id/tvTemperature"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="22°C"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/texto_principal"
+                    android:layout_marginTop="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/dashboard_temperature"
+                    android:textSize="@dimen/text_size_small"
+                    android:textColor="@color/texto_secundario" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

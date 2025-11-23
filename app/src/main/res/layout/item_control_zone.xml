@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/margin_medium"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
+    app:strokeWidth="0dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/padding_medium">
+
+        <!-- Icono de la zona -->
+        <ImageView
+            android:id="@+id/ivZoneIcon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_zone_tomato"
+            android:contentDescription="@string/control_manual_title"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:tint="@color/verde_primary" />
+
+        <!-- Nombre de la zona -->
+        <TextView
+            android:id="@+id/tvZoneName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/zone_tomatoes"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/texto_principal"
+            android:layout_marginStart="@dimen/margin_medium"
+            app:layout_constraintTop_toTopOf="@id/ivZoneIcon"
+            app:layout_constraintStart_toEndOf="@id/ivZoneIcon"
+            app:layout_constraintEnd_toStartOf="@id/switchStatus" />
+
+        <!-- Switch ON/OFF -->
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switchStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:trackTint="@color/grafica_linea_umbral"
+            app:thumbTint="@color/verde_primary" />
+
+        <!-- Estado actual -->
+        <LinearLayout
+            android:id="@+id/llStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="4dp"
+            app:layout_constraintTop_toBottomOf="@id/tvZoneName"
+            app:layout_constraintStart_toStartOf="@id/tvZoneName">
+
+            <View
+                android:id="@+id/viewStatusIndicator"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/indicator_inactive" />
+
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/control_manual_off"
+                android:textSize="@dimen/text_size_small"
+                android:textColor="@color/texto_secundario" />
+
+        </LinearLayout>
+
+        <!-- Última activación -->
+        <TextView
+            android:id="@+id/tvLastIrrigation"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/control_manual_last_irrigation"
+            android:textSize="@dimen/text_size_small"
+            android:textColor="@color/texto_secundario"
+            android:layout_marginTop="@dimen/margin_small"
+            app:layout_constraintTop_toBottomOf="@id/llStatus"
+            app:layout_constraintStart_toStartOf="@id/tvZoneName"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

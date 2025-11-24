@@ -2,6 +2,7 @@ package com.hortechia.smartriego.ui
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -19,6 +20,12 @@ import com.hortechia.smartriego.R
 import com.hortechia.smartriego.adapter.ZoneAdapter
 import com.hortechia.smartriego.model.Zone
 import com.hortechia.smartriego.HistorialActivity
+import com.hortechia.smartriego.ProgramacionActivity
+import com.hortechia.smartriego.ConfiguracionActivity
+import com.hortechia.smartriego.ui.ControlManualActivity
+import com.hortechia.smartriego.databinding.ActivityDashboardBinding
+import com.hortechia.smartriego.utils.PermisosHelper
+import com.hortechia.smartriego.utils.InterconexionHelper
 
 /**
  * DashboardActivity - Pantalla principal del dashboard
@@ -29,10 +36,12 @@ import com.hortechia.smartriego.HistorialActivity
  * - Bottom Navigation
  * - Menú de perfil
  *
- * @author Jennifer Astudillo & setupBottomNavigation()Carlos Velásquez
+ * @author Jennifer Astudillo & Carlos Velásquez
  */
 class DashboardActivity : AppCompatActivity() {
 
+    private lateinit var permisosHelper: PermisosHelper
+    private lateinit var interconexionHelper: InterconexionHelper
     private lateinit var toolbar: MaterialToolbar
     private lateinit var tvUserName: TextView
     private lateinit var rvZones: RecyclerView
@@ -42,6 +51,7 @@ class DashboardActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var database: FirebaseDatabase
+    private lateinit var deviceId: String
 
     private val zones = mutableListOf<Zone>()
     private lateinit var zoneAdapter: ZoneAdapter
@@ -53,6 +63,15 @@ class DashboardActivity : AppCompatActivity() {
         // Inicializar Firebase
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance()
+
+        // Usar Device ID del ESP32
+        deviceId = "0qe3XVfFnWREiNqQMNpz4tlYKi2"
+
+        // Inicializar helpers
+        permisosHelper = PermisosHelper(this)
+        permisosHelper.solicitarPermisosNecesarios()
+
+        interconexionHelper = InterconexionHelper(this)
 
         // Inicializar vistas
         initViews()
@@ -66,7 +85,7 @@ class DashboardActivity : AppCompatActivity() {
         // Cargar datos del usuario
         loadUserData()
 
-        // Cargar zonas (simuladas por ahora)
+        // Cargar zonas
         loadZones()
 
         // Configurar listeners
@@ -125,11 +144,10 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     /**
-     * Carga las zonas (simuladas por ahora)
-     * TODO: Cargar desde Firebase cuando esté listo el ESP32
+     * Carga las zonas desde Firebase en tiempo real
      */
     private fun loadZones() {
-        // Zonas simuladas con datos de ejemplo
+        // Mantener las zonas simuladas como base
         zones.clear()
         zones.addAll(listOf(
             Zone(
@@ -138,7 +156,7 @@ class DashboardActivity : AppCompatActivity() {
                 humidity = 45,
                 temperature = 22.5,
                 isActive = true,
-                lastIrrigation = System.currentTimeMillis() - (2 * 60 * 60 * 1000), // Hace 2 horas
+                lastIrrigation = System.currentTimeMillis() - (2 * 60 * 60 * 1000),
                 icon = R.drawable.ic_zone_tomato
             ),
             Zone(
@@ -147,14 +165,14 @@ class DashboardActivity : AppCompatActivity() {
                 humidity = 62,
                 temperature = 23.0,
                 isActive = false,
-                lastIrrigation = System.currentTimeMillis() - (5 * 60 * 60 * 1000), // Hace 5 horas
+                lastIrrigation = System.currentTimeMillis() - (5 * 60 * 60 * 1000),
                 icon = R.drawable.ic_zone_grass
             )
         ))
 
         zoneAdapter.notifyDataSetChanged()
 
-        // Mostrar mensaje si no hay zonas
+        // Mostrar/ocultar mensaje
         if (zones.isEmpty()) {
             tvNoZones.visibility = android.view.View.VISIBLE
             rvZones.visibility = android.view.View.GONE
@@ -162,6 +180,66 @@ class DashboardActivity : AppCompatActivity() {
             tvNoZones.visibility = android.view.View.GONE
             rvZones.visibility = android.view.View.VISIBLE
         }
+
+        // Conectar con Firebase para actualizar datos en tiempo real
+        loadZonesFromFirebase()
+    }
+
+    /**
+     * Conecta con Firebase y actualiza los datos de las zonas en tiempo real
+     */
+    private fun loadZonesFromFirebase() {
+        // Escuchar zona tomates
+        database.reference.child("devices").child(deviceId).child("zone_tomatoes")
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val humedad = snapshot.child("humedad").getValue(Int::class.java) ?: 45
+                    val temperatura = snapshot.child("temperatura").getValue(Int::class.java)?.toDouble() ?: 22.5
+                    val estadoValvula = snapshot.child("estado_valvula").getValue(Boolean::class.java) ?: false
+
+                    // Actualizar zona en la lista
+                    val zoneIndex = zones.indexOfFirst { it.id == "zone_tomatoes" }
+                    if (zoneIndex != -1) {
+                        zones[zoneIndex] = zones[zoneIndex].copy(
+                            humidity = humedad,
+                            temperature = temperatura,
+                            isActive = estadoValvula
+                        )
+                        zoneAdapter.notifyItemChanged(zoneIndex)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(this@DashboardActivity,
+                        "Error al cargar datos de tomates", Toast.LENGTH_SHORT).show()
+                }
+            })
+
+        // Escuchar zona césped
+        database.reference.child("devices").child(deviceId).child("zone_grass")
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val humedad = snapshot.child("humedad").getValue(Int::class.java) ?: 62
+                    val temperatura = snapshot.child("temperatura").getValue(Int::class.java)?.toDouble() ?: 23.0
+                    val estadoValvula = snapshot.child("estado_valvula").getValue(Boolean::class.java) ?: false
+
+                    // Actualizar zona en la lista
+                    val zoneIndex = zones.indexOfFirst { it.id == "zone_grass" }
+                    if (zoneIndex != -1) {
+                        zones[zoneIndex] = zones[zoneIndex].copy(
+                            humidity = humedad,
+                            temperature = temperatura,
+                            isActive = estadoValvula
+                        )
+                        zoneAdapter.notifyItemChanged(zoneIndex)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(this@DashboardActivity,
+                        "Error al cargar datos de césped", Toast.LENGTH_SHORT).show()
+                }
+            })
     }
 
     /**
@@ -183,6 +261,7 @@ class DashboardActivity : AppCompatActivity() {
                 }
                 R.id.nav_irrigation -> {
                     startActivity(Intent(this, ControlManualActivity::class.java))
+                    finish()
                     true
                 }
                 R.id.nav_history -> {
@@ -190,9 +269,14 @@ class DashboardActivity : AppCompatActivity() {
                     finish()
                     true
                 }
+                R.id.nav_schedule -> {
+                    startActivity(Intent(this, ProgramacionActivity::class.java))
+                    finish()
+                    true
+                }
                 R.id.nav_settings -> {
-                    // TODO: Navegar a Configuración
-                    Toast.makeText(this, "Configuración - Próximamente", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, ConfiguracionActivity::class.java))
+                    finish()
                     true
                 }
                 else -> false
@@ -225,11 +309,64 @@ class DashboardActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_profile -> {
-                // TODO: Navegar a Perfil
                 Toast.makeText(this, "Perfil - Próximamente", Toast.LENGTH_SHORT).show()
+                true
+            }
+            R.id.action_share -> {
+                compartirReporte()
+                true
+            }
+            R.id.action_location -> {
+                interconexionHelper.abrirUbicacionEnMaps()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
+
+    /**
+     * Maneja el resultado de solicitudes de permisos
+     */
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        when (requestCode) {
+            PermisosHelper.REQUEST_LOCATION -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Permiso de ubicación concedido", Toast.LENGTH_SHORT).show()
+                }
+            }
+            PermisosHelper.REQUEST_NOTIFICATIONS -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Permiso de notificaciones concedido", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    /**
+     * Compartir reporte con datos actuales
+     */
+    private fun compartirReporte() {
+        if (zones.size >= 2) {
+            val zona1 = zones.find { it.id == "zone_tomatoes" }
+            val zona2 = zones.find { it.id == "zone_grass" }
+
+            if (zona1 != null && zona2 != null) {
+                interconexionHelper.compartirReporteRiego(
+                    zona1Humedad = zona1.humidity,
+                    zona2Humedad = zona2.humidity,
+                    zona1Estado = if (zona1.isActive) "Activo" else "Inactivo",
+                    zona2Estado = if (zona2.isActive) "Activo" else "Inactivo"
+                )
+            }
+        } else {
+            Toast.makeText(this, "Esperando datos de zonas...", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 }

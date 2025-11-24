@@ -1,5 +1,10 @@
 package com.hortechia.smartriego.ui
 
+import android.content.Intent
+import com.hortechia.smartriego.HistorialActivity
+import com.hortechia.smartriego.ProgramacionActivity
+import com.hortechia.smartriego.ConfiguracionActivity
+import com.hortechia.smartriego.ui.DashboardActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -36,6 +41,8 @@ class ControlManualActivity : AppCompatActivity() {
     private lateinit var database: FirebaseDatabase
     private lateinit var devicesRef: DatabaseReference
 
+    private lateinit var deviceId: String
+
     private val zones = mutableListOf<Zone>()
     private lateinit var zoneAdapter: ControlZoneAdapter
 
@@ -50,10 +57,11 @@ class ControlManualActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         database = FirebaseDatabase.getInstance()
 
-        val userId = auth.currentUser?.uid
-        if (userId != null) {
-            devicesRef = database.reference.child("devices").child(userId)
-        }
+        // Usar Device ID del ESP32
+        deviceId = "0qe3XVfFnWREiNqQMNpz4tlYKi2"
+
+        // Usar deviceId en lugar de userId para conectar con Firebase
+        devicesRef = database.reference.child("devices").child(deviceId)
 
         // Inicializar vistas
         initViews()
@@ -69,6 +77,9 @@ class ControlManualActivity : AppCompatActivity() {
 
         // Configurar listeners
         setupListeners()
+
+        // Configurar bottom navigation
+        setupBottomNavigation()
     }
 
     /**
@@ -112,8 +123,7 @@ class ControlManualActivity : AppCompatActivity() {
     private fun loadZones() {
         showLoading(true)
 
-        // TODO: Cargar desde Firebase cuando esté listo el ESP32
-        // Por ahora usamos datos simulados
+        // Datos simulados iniciales
         zones.clear()
         zones.addAll(listOf(
             Zone(
@@ -147,27 +157,53 @@ class ControlManualActivity : AppCompatActivity() {
      * Carga el estado actual de las zonas desde Firebase
      */
     private fun loadZoneStatesFromFirebase() {
-        val userId = auth.currentUser?.uid ?: return
+        // Escuchar cambios en tiempo real desde Firebase
 
-        devicesRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        // Zona tomates
+        devicesRef.child("zone_tomatoes").addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                zones.forEachIndexed { index, zone ->
-                    val zoneSnapshot = snapshot.child(zone.id)
-                    val status = zoneSnapshot.child("status").getValue(String::class.java)
+                val estadoValvula = snapshot.child("estado_valvula").getValue(Boolean::class.java) ?: false
+                val humedad = snapshot.child("humedad").getValue(Int::class.java) ?: 45
+                val temperatura = snapshot.child("temperatura").getValue(Int::class.java)?.toDouble() ?: 22.5
 
-                    if (status != null) {
-                        zones[index] = zone.copy(isActive = status == "on")
-                    }
+                val zoneIndex = zones.indexOfFirst { it.id == "zone_tomatoes" }
+                if (zoneIndex != -1) {
+                    zones[zoneIndex] = zones[zoneIndex].copy(
+                        isActive = estadoValvula,
+                        humidity = humedad,
+                        temperature = temperatura
+                    )
+                    zoneAdapter.notifyItemChanged(zoneIndex)
                 }
-                zoneAdapter.notifyDataSetChanged()
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Toast.makeText(
-                    this@ControlManualActivity,
-                    "Error al cargar datos: ${error.message}",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(this@ControlManualActivity,
+                    "Error al cargar zona tomates", Toast.LENGTH_SHORT).show()
+            }
+        })
+
+        // Zona césped
+        devicesRef.child("zone_grass").addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val estadoValvula = snapshot.child("estado_valvula").getValue(Boolean::class.java) ?: false
+                val humedad = snapshot.child("humedad").getValue(Int::class.java) ?: 62
+                val temperatura = snapshot.child("temperatura").getValue(Int::class.java)?.toDouble() ?: 23.0
+
+                val zoneIndex = zones.indexOfFirst { it.id == "zone_grass" }
+                if (zoneIndex != -1) {
+                    zones[zoneIndex] = zones[zoneIndex].copy(
+                        isActive = estadoValvula,
+                        humidity = humedad,
+                        temperature = temperatura
+                    )
+                    zoneAdapter.notifyItemChanged(zoneIndex)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(this@ControlManualActivity,
+                    "Error al cargar zona césped", Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -203,22 +239,13 @@ class ControlManualActivity : AppCompatActivity() {
 
         showLoading(true)
 
-        val userId = auth.currentUser?.uid
-        if (userId == null) {
-            showLoading(false)
-            Toast.makeText(this, "Error: Usuario no autenticado", Toast.LENGTH_SHORT).show()
-            return
-        }
-
         // Guardar cada cambio en Firebase
         val updates = mutableMapOf<String, Any>()
 
         pendingChanges.forEach { (zoneId, isActive) ->
-            val status = if (isActive) "on" else "off"
-            val timestamp = System.currentTimeMillis()
-
-            updates["$zoneId/status"] = status
-            updates["$zoneId/timestamp"] = timestamp
+            // Actualizar en Firebase con los campos correctos
+            updates["$zoneId/estado_valvula"] = isActive
+            updates["$zoneId/timestamp"] = System.currentTimeMillis()
             updates["$zoneId/manual"] = true
         }
 
@@ -267,5 +294,44 @@ class ControlManualActivity : AppCompatActivity() {
         progressBar.visibility = if (show) View.VISIBLE else View.GONE
         btnApply.isEnabled = !show && pendingChanges.isNotEmpty()
         rvZones.isEnabled = !show
+    }
+
+    /**
+     * Configura el BottomNavigationView
+     */
+    private fun setupBottomNavigation() {
+        val bottomNavigation = findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottomNavigation)
+
+        bottomNavigation.selectedItemId = R.id.nav_irrigation
+
+        bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> {
+                    startActivity(Intent(this, DashboardActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_irrigation -> {
+                    // Ya estamos aquí
+                    true
+                }
+                R.id.nav_history -> {
+                    startActivity(Intent(this, HistorialActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_schedule -> {
+                    startActivity(Intent(this, ProgramacionActivity::class.java))
+                    finish()
+                    true
+                }
+                R.id.nav_settings -> {
+                    startActivity(Intent(this, ConfiguracionActivity::class.java))
+                    finish()
+                    true
+                }
+                else -> false
+            }
+        }
     }
 }

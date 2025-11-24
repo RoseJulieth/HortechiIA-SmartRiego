@@ -17,13 +17,13 @@
         <!-- Icono de la zona -->
         <ImageView
             android:id="@+id/ivZoneIcon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:src="@drawable/ic_zone_tomato"
             android:contentDescription="@string/control_manual_title"
+            android:scaleType="centerCrop"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:tint="@color/verde_primary" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <!-- Nombre de la zona -->
         <TextView

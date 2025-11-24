@@ -118,4 +118,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCompartirReporte"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="📤 Compartir Reporte"
+        app:icon="@drawable/ic_share" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnVerUbicacion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="📍 Ver Ubicación en Maps"
+        app:icon="@drawable/ic_location" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

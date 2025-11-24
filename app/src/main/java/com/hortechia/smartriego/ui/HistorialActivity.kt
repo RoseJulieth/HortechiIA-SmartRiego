@@ -70,7 +70,6 @@ class HistorialActivity : AppCompatActivity() {
     }
 
     private fun setupBottomNavigation() {
-        // Marcar el item actual como seleccionado
         binding.bottomNavigation.selectedItemId = R.id.nav_history
 
         binding.bottomNavigation.setOnItemSelectedListener { item ->
@@ -80,17 +79,23 @@ class HistorialActivity : AppCompatActivity() {
                     finish()
                     true
                 }
-                R.id.nav_history -> {
-                    // Ya estamos aquí
-                    true
-                }
                 R.id.nav_irrigation -> {
                     startActivity(Intent(this, ControlManualActivity::class.java))
                     finish()
                     true
                 }
+                R.id.nav_history -> {
+                    // Ya estamos aquí
+                    true
+                }
+                R.id.nav_schedule -> {
+                    startActivity(Intent(this, ProgramacionActivity::class.java))
+                    finish()
+                    true
+                }
                 R.id.nav_settings -> {
-                    // TODO: Implementar ConfiguracionActivity
+                    startActivity(Intent(this, ConfiguracionActivity::class.java))
+                    finish()
                     true
                 }
                 else -> false

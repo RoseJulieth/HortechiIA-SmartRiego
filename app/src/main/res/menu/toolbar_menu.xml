@@ -3,9 +3,21 @@
     xmlns:app="http://schemas.android.com/app/res-auto">
 
     <item
+        android:id="@+id/action_share"
+        android:icon="@drawable/ic_share"
+        android:title="Compartir"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_location"
+        android:icon="@drawable/ic_location"
+        android:title="Ubicación"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/action_profile"
         android:icon="@drawable/ic_person"
-        android:title="@string/menu_profile"
-        app:showAsAction="ifRoom" />
+        android:title="Perfil"
+        app:showAsAction="never" />
 
 </menu>

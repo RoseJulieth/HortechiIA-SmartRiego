@@ -126,4 +126,7 @@
     <string name="control_manual_error">Error al aplicar cambios</string>
     <string name="control_manual_never">Nunca</string>
     <string name="control_manual_ago">hace %s</string>
+
+    <!-- PROGRAMAR -->
+    <string name="nav_schedule">Programar</string>
 </resources>

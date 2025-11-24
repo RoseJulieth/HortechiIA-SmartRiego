@@ -18,6 +18,7 @@ import com.google.firebase.database.*
 import com.hortechia.smartriego.R
 import com.hortechia.smartriego.adapter.ZoneAdapter
 import com.hortechia.smartriego.model.Zone
+import com.hortechia.smartriego.HistorialActivity
 
 /**
  * DashboardActivity - Pantalla principal del dashboard
@@ -28,7 +29,7 @@ import com.hortechia.smartriego.model.Zone
  * - Bottom Navigation
  * - Menú de perfil
  *
- * @author Jennifer Astudillo & Carlos Velásquez
+ * @author Jennifer Astudillo & setupBottomNavigation()Carlos Velásquez
  */
 class DashboardActivity : AppCompatActivity() {
 
@@ -185,8 +186,8 @@ class DashboardActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_history -> {
-                    // TODO: Navegar a Historial (Paso 9)
-                    Toast.makeText(this, "Historial - Próximamente", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, HistorialActivity::class.java))
+                    finish()
                     true
                 }
                 R.id.nav_settings -> {

@@ -61,4 +61,14 @@
     <color name="sensor_humedad">#2196F3</color>
     <color name="sensor_temperatura">#FF5722</color>
 
+    <!-- Colores para gráficas -->
+    <color name="zona1_color">#FF9800</color>
+    <color name="zona2_color">#4CAF50</color>
+    <color name="umbral_minimo">#FF5252</color>
+    <color name="umbral_optimo">#66BB6A</color>
+    <color name="background_light">#F5F5F5</color>
+
+    <color name="primary">@color/verde_primary</color>
+    <color name="text_hint">@color/texto_hint</color>
+
 </resources>

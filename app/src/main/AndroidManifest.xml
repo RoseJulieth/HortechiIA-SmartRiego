@@ -69,6 +69,11 @@
             android:screenOrientation="portrait"
             android:parentActivityName=".ui.DashboardActivity" />
 
+        <activity
+            android:name=".HistorialActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
         <!-- MainActivity - Pantalla temporal -->
         <activity
             android:name=".MainActivity"

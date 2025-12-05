@@ -80,6 +80,9 @@ class ControlManualActivity : AppCompatActivity() {
 
         // Configurar bottom navigation
         setupBottomNavigation()
+
+        // Configurar manejo del botón Atrás
+        setupBackHandler()
     }
 
     /**
@@ -99,7 +102,8 @@ class ControlManualActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener {
-            finish()
+            // Volver al Dashboard correctamente
+            volverAlDashboard()
         }
     }
 
@@ -264,6 +268,9 @@ class ControlManualActivity : AppCompatActivity() {
 
                 // Actualizar timestamps en las zonas
                 updateLocalZoneTimestamps()
+
+                // NO navegar automáticamente - dejar que el usuario explore
+                // Si quiere volver, usará el botón Atrás o bottom nav
             }
             .addOnFailureListener { e ->
                 showLoading(false)
@@ -288,6 +295,37 @@ class ControlManualActivity : AppCompatActivity() {
     }
 
     /**
+     * Volver al Dashboard correctamente sin ciclos
+     */
+    private fun volverAlDashboard() {
+        // Prevenir múltiples llamadas
+        if (isFinishing) return
+
+        val intent = Intent(this, DashboardActivity::class.java).apply {
+            // Limpiar todo el back stack hasta Dashboard
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                    Intent.FLAG_ACTIVITY_NO_ANIMATION
+        }
+        startActivity(intent)
+        finish()
+
+        // Animación de salida suave
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+    }
+
+    /**
+     * Manejo del botón Atrás del sistema (Android 13+ compatible)
+     */
+    private fun setupBackHandler() {
+        onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                volverAlDashboard()
+            }
+        })
+    }
+
+    /**
      * Muestra u oculta el loading
      */
     private fun showLoading(show: Boolean) {
@@ -307,7 +345,10 @@ class ControlManualActivity : AppCompatActivity() {
         bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    startActivity(Intent(this, DashboardActivity::class.java))
+                    val intent = Intent(this, DashboardActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    }
+                    startActivity(intent)
                     finish()
                     true
                 }

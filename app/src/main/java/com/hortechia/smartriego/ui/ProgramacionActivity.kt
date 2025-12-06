@@ -28,11 +28,12 @@ class ProgramacionActivity : AppCompatActivity() {
         loadProgramaciones()
         setupListeners()
         setupBottomNavigation()
+        setupBackHandler() // ← NUEVO
     }
 
     private fun setupToolbar() {
         binding.toolbar.setNavigationOnClickListener {
-            finish()
+            volverAlDashboard() // ← CAMBIADO de finish()
         }
     }
 
@@ -109,7 +110,10 @@ class ProgramacionActivity : AppCompatActivity() {
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    startActivity(Intent(this, DashboardActivity::class.java))
+                    val intent = Intent(this, DashboardActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    }
+                    startActivity(intent) // ← ACTUALIZADO con flags
                     finish()
                     true
                 }
@@ -168,5 +172,32 @@ class ProgramacionActivity : AppCompatActivity() {
     private fun mostrarDialogAgregar() {
         Toast.makeText(this, "Dialog agregar programación - Próximamente", Toast.LENGTH_SHORT).show()
         // TODO: Implementar dialog completo con TimePicker, días, etc.
+    }
+
+    /**
+     * Volver al Dashboard correctamente sin ciclos
+     */
+    private fun volverAlDashboard() {
+        if (isFinishing) return
+
+        val intent = Intent(this, DashboardActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                    Intent.FLAG_ACTIVITY_NO_ANIMATION
+        }
+        startActivity(intent)
+        finish()
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+    }
+
+    /**
+     * Manejo del botón Atrás del sistema (Android 13+ compatible)
+     */
+    private fun setupBackHandler() {
+        onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                volverAlDashboard()
+            }
+        })
     }
 }

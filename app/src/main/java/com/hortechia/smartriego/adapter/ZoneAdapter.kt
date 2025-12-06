@@ -12,13 +12,13 @@ import com.hortechia.smartriego.model.Zone
 /**
  * Adapter para el RecyclerView de zonas en el Dashboard
  *
- * @param zones Lista de zonas a mostrar
+ * @param zones Lista MUTABLE de zonas a mostrar
  * @param onZoneClick Callback cuando se hace click en una zona
  *
  * @author Jennifer Astudillo & Carlos Velásquez
  */
 class ZoneAdapter(
-    private val zones: List<Zone>,
+    private var zones: MutableList<Zone>,
     private val onZoneClick: (Zone) -> Unit
 ) : RecyclerView.Adapter<ZoneAdapter.ZoneViewHolder>() {
 
@@ -37,13 +37,11 @@ class ZoneAdapter(
             tvHumidity.text = zone.getHumidityText()
             tvTemperature.text = zone.getTemperatureText()
 
-            // Cambiar color del indicador según estado
             viewStatusIndicator.setBackgroundResource(
                 if (zone.isActive) R.drawable.indicator_active
                 else R.drawable.indicator_inactive
             )
 
-            // Click listener
             itemView.setOnClickListener {
                 onZoneClick(zone)
             }
@@ -57,8 +55,34 @@ class ZoneAdapter(
     }
 
     override fun onBindViewHolder(holder: ZoneViewHolder, position: Int) {
-        holder.bind(zones[position])
+        val zone = zones[position]
+        android.util.Log.d("ZoneAdapter", "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        android.util.Log.d("ZoneAdapter", "onBindViewHolder - Position: $position")
+        android.util.Log.d("ZoneAdapter", "  Zone ID: ${zone.id}")
+        android.util.Log.d("ZoneAdapter", "  Zone Name: ${zone.name}")
+        android.util.Log.d("ZoneAdapter", "  Humidity: ${zone.humidity}")
+        android.util.Log.d("ZoneAdapter", "  Temperature: ${zone.temperature}")
+        android.util.Log.d("ZoneAdapter", "  isActive: ${zone.isActive}")
+        android.util.Log.d("ZoneAdapter", "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+
+        holder.bind(zone)
     }
 
-    override fun getItemCount(): Int = zones.size
+    override fun getItemCount(): Int {
+        android.util.Log.d("ZoneAdapter", "📊 getItemCount: ${zones.size} zonas")
+        return zones.size
+    }
+
+    fun updateZones(newZones: List<Zone>) {
+        zones.clear()
+        zones.addAll(newZones)
+        notifyDataSetChanged()
+    }
+
+    fun updateZone(position: Int, zone: Zone) {
+        if (position in zones.indices) {
+            zones[position] = zone
+            notifyItemChanged(position)
+        }
+    }
 }

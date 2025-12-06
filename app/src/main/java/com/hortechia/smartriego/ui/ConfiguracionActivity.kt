@@ -36,11 +36,12 @@ class ConfiguracionActivity : AppCompatActivity() {
         setupListeners()
         setupPrivacyButtons()
         setupBottomNavigation()
+        setupBackHandler() // ← NUEVO
     }
 
     private fun setupToolbar() {
         binding.toolbar.setNavigationOnClickListener {
-            finish()
+            volverAlDashboard() // ← CAMBIADO de finish()
         }
     }
 
@@ -147,7 +148,10 @@ class ConfiguracionActivity : AppCompatActivity() {
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    startActivity(Intent(this, DashboardActivity::class.java))
+                    val intent = Intent(this, DashboardActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    }
+                    startActivity(intent) // ← ACTUALIZADO con flags
                     finish()
                     true
                 }
@@ -273,7 +277,7 @@ class ConfiguracionActivity : AppCompatActivity() {
                 // Limpiar preferencias si es necesario
                 sharedPreferences.edit().clear().apply()
 
-                // Ir a Login
+                // Ir a Login (esta navegación está bien, no modificar)
                 val intent = Intent(this, LoginActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
@@ -319,7 +323,7 @@ class ConfiguracionActivity : AppCompatActivity() {
             database.reference.child("irrigation_history").child(userId).removeValue()
             database.reference.child("zones").child(userId).removeValue()
 
-            // Eliminar autenticación Firebase
+            // Eliminar autenticación Firebase (esta navegación está bien, no modificar)
             user.delete().addOnSuccessListener {
                 Toast.makeText(this, "✅ Cuenta eliminada correctamente", Toast.LENGTH_LONG).show()
 
@@ -403,5 +407,32 @@ https://hortechia.com/privacy
         } else {
             Toast.makeText(this, "Error: Usuario no autenticado", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    /**
+     * Volver al Dashboard correctamente sin ciclos
+     */
+    private fun volverAlDashboard() {
+        if (isFinishing) return
+
+        val intent = Intent(this, DashboardActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                    Intent.FLAG_ACTIVITY_NO_ANIMATION
+        }
+        startActivity(intent)
+        finish()
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+    }
+
+    /**
+     * Manejo del botón Atrás del sistema (Android 13+ compatible)
+     */
+    private fun setupBackHandler() {
+        onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                volverAlDashboard()
+            }
+        })
     }
 }

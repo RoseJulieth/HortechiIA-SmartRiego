@@ -412,9 +412,11 @@ class DashboardActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_profile -> {
-                Toast.makeText(this, "Perfil - Próximamente", Toast.LENGTH_SHORT).show()
+                // CORRECCIÓN: Ahora abre la actividad real
+                startActivity(Intent(this, ProfileActivity::class.java))
                 true
             }
+
             R.id.action_share -> {
                 compartirReporte()
                 true

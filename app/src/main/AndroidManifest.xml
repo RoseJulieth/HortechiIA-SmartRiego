@@ -2,8 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- ===== PERMISOS NECESARIOS ===== -->
-
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -12,8 +10,6 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -26,7 +22,6 @@
         android:theme="@style/Theme.Material3.DayNight.NoActionBar"
         tools:targetApi="36">
 
-        <!-- SplashActivity -->
         <activity
             android:name=".ui.SplashActivity"
             android:exported="true"
@@ -67,6 +62,12 @@
             android:screenOrientation="portrait" />
 
         <activity
+            android:name=".ui.ProfileActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".ui.DashboardActivity" />
+
+        <activity
             android:name=".ui.ControlManualActivity"
             android:exported="false"
             android:screenOrientation="portrait"
@@ -84,11 +85,6 @@
 
         <activity
             android:name=".ConfiguracionActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".MainActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
 

@@ -7,7 +7,6 @@
     android:layout_height="match_parent"
     android:background="@color/fondo_blanco">
 
-    <!-- Toolbar / Header -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
@@ -21,8 +20,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- ScrollView para contenido -->
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:id="@+id/scrollView"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -38,7 +36,6 @@
             android:orientation="vertical"
             android:padding="@dimen/padding_medium">
 
-            <!-- Mensaje de Bienvenida -->
             <TextView
                 android:id="@+id/tvWelcome"
                 android:layout_width="wrap_content"
@@ -58,7 +55,61 @@
                 android:textColor="@color/texto_secundario"
                 android:layout_marginBottom="@dimen/margin_large" />
 
-            <!-- Título de sección -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Estado del Sistema"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/texto_secundario"
+                        android:layout_marginBottom="16dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="✅"
+                        android:textSize="64sp"
+                        android:contentDescription="Sistema conectado" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Sistema conectado"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/texto_principal"
+                        android:layout_marginTop="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Actualizado hace 2 min"
+                        android:textSize="12sp"
+                        android:textColor="@color/texto_secundario"
+                        android:layout_marginTop="4dp" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <include
+                android:id="@+id/cardClima"
+                layout="@layout/card_clima" />
+
             <TextView
                 android:id="@+id/tvSectionTitle"
                 android:layout_width="wrap_content"
@@ -67,9 +118,9 @@
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="@color/texto_principal"
+                android:layout_marginTop="8dp"
                 android:layout_marginBottom="@dimen/margin_medium" />
 
-            <!-- RecyclerView para las zonas -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvZones"
                 android:layout_width="match_parent"
@@ -78,7 +129,6 @@
                 tools:listitem="@layout/item_zone_card"
                 tools:itemCount="2" />
 
-            <!-- Mensaje si no hay zonas -->
             <TextView
                 android:id="@+id/tvNoZones"
                 android:layout_width="wrap_content"
@@ -91,7 +141,6 @@
                 android:visibility="gone"
                 tools:visibility="visible" />
 
-            <!-- Botón Control Manual -->
             <Button
                 android:id="@+id/btnControlManual"
                 style="@style/Widget.HortechIA.Button"
@@ -102,9 +151,8 @@
 
         </LinearLayout>
 
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
-    <!-- Bottom Navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="0dp"
@@ -117,19 +165,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnCompartirReporte"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="📤 Compartir Reporte"
-        app:icon="@drawable/ic_share" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnVerUbicacion"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="📍 Ver Ubicación en Maps"
-        app:icon="@drawable/ic_location" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -349,7 +349,6 @@ class ControlManualActivity : AppCompatActivity() {
                         flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                     }
                     startActivity(intent)
-                    finish()
                     true
                 }
                 R.id.nav_irrigation -> {

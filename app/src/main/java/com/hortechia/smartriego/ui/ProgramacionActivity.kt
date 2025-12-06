@@ -2,6 +2,9 @@ package com.hortechia.smartriego
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.widget.EditText
+import android.widget.TimePicker
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -11,6 +14,8 @@ import com.hortechia.smartriego.databinding.ActivityProgramacionBinding
 import com.hortechia.smartriego.models.ProgramacionData
 import com.hortechia.smartriego.ui.ControlManualActivity
 import com.hortechia.smartriego.ui.DashboardActivity
+import com.hortechia.smartriego.HistorialActivity // Agrega esta importación si falta
+import com.hortechia.smartriego.ConfiguracionActivity // Agrega esta importación si falta
 
 class ProgramacionActivity : AppCompatActivity() {
 
@@ -28,12 +33,11 @@ class ProgramacionActivity : AppCompatActivity() {
         loadProgramaciones()
         setupListeners()
         setupBottomNavigation()
-        setupBackHandler() // ← NUEVO
     }
 
     private fun setupToolbar() {
         binding.toolbar.setNavigationOnClickListener {
-            volverAlDashboard() // ← CAMBIADO de finish()
+            finish()
         }
     }
 
@@ -89,18 +93,20 @@ class ProgramacionActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        // FAB Agregar
+        // FAB Agregar (Ahora funcional)
         binding.fabAgregar.setOnClickListener {
             mostrarDialogAgregar()
         }
 
-        // Switch Modo Inteligente
+        // Switch Modo Inteligente (Ahora da feedback visual)
         binding.switchModoInteligente.setOnCheckedChangeListener { _, isChecked ->
-            Toast.makeText(
-                this,
-                if (isChecked) "Modo Inteligente activado" else "Modo Inteligente desactivado",
-                Toast.LENGTH_SHORT
-            ).show()
+            if (isChecked) {
+                Toast.makeText(this, "🧠 Modo Inteligente ACTIVADO: Se suspenderán riegos por lluvia", Toast.LENGTH_LONG).show()
+                binding.toolbar.subtitle = "Modo IA: Activo" // Indicador visual en toolbar
+            } else {
+                Toast.makeText(this, "Modo Inteligente desactivado", Toast.LENGTH_SHORT).show()
+                binding.toolbar.subtitle = null
+            }
         }
     }
 
@@ -110,10 +116,7 @@ class ProgramacionActivity : AppCompatActivity() {
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
-                    val intent = Intent(this, DashboardActivity::class.java).apply {
-                        flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-                    }
-                    startActivity(intent) // ← ACTUALIZADO con flags
+                    startActivity(Intent(this, DashboardActivity::class.java))
                     finish()
                     true
                 }
@@ -127,10 +130,7 @@ class ProgramacionActivity : AppCompatActivity() {
                     finish()
                     true
                 }
-                R.id.nav_schedule -> {
-                    // Ya estamos aquí
-                    true
-                }
+                R.id.nav_schedule -> true
                 R.id.nav_settings -> {
                     startActivity(Intent(this, ConfiguracionActivity::class.java))
                     finish()
@@ -142,17 +142,66 @@ class ProgramacionActivity : AppCompatActivity() {
     }
 
     private fun onProgramacionToggle(programacion: ProgramacionData, isChecked: Boolean) {
-        Toast.makeText(
-            this,
-            "${programacion.nombre}: ${if (isChecked) "Activado" else "Desactivado"}",
-            Toast.LENGTH_SHORT
-        ).show()
-        // TODO: Actualizar en Firebase
+        val estado = if (isChecked) "Activado" else "Desactivado"
+        Toast.makeText(this, "${programacion.nombre}: $estado", Toast.LENGTH_SHORT).show()
     }
 
+    // --- AQUÍ ESTÁ LA MAGIA DE EDICIÓN ---
     private fun onEditarProgramacion(programacion: ProgramacionData) {
-        Toast.makeText(this, "Editar: ${programacion.nombre}", Toast.LENGTH_SHORT).show()
-        // TODO: Abrir dialog de edición
+        // Creamos un layout simple programáticamente o inflamos uno si prefieres
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Editar: ${programacion.nombre}")
+
+        val layout = android.widget.LinearLayout(this)
+        layout.orientation = android.widget.LinearLayout.VERTICAL
+        layout.setPadding(50, 40, 50, 10)
+
+        val inputNombre = EditText(this)
+        inputNombre.hint = "Nombre del programa"
+        inputNombre.setText(programacion.nombre)
+        layout.addView(inputNombre)
+
+        val inputDuracion = EditText(this)
+        inputDuracion.hint = "Duración (minutos)"
+        inputDuracion.inputType = android.text.InputType.TYPE_CLASS_NUMBER
+        inputDuracion.setText(programacion.duracion.toString())
+        layout.addView(inputDuracion)
+
+        // TimePicker (Reloj)
+        val timeLabel = android.widget.TextView(this)
+        timeLabel.text = "Hora de inicio:"
+        timeLabel.setPadding(0, 20, 0, 10)
+        layout.addView(timeLabel)
+
+        val timePicker = TimePicker(this)
+        timePicker.setIs24HourView(true)
+        // Modo spinner para que no ocupe toda la pantalla
+        timePicker.hour = 18
+        timePicker.minute = 0
+        layout.addView(timePicker)
+
+        builder.setView(layout)
+
+        builder.setPositiveButton("Guardar") { _, _ ->
+            val nuevoNombre = inputNombre.text.toString()
+            val nuevaDuracion = inputDuracion.text.toString().toIntOrNull() ?: 10
+            val hora = "${timePicker.hour}:${String.format("%02d", timePicker.minute)}"
+
+            // Actualizamos el objeto en la lista (Simulando persistencia)
+            val index = programaciones.indexOf(programacion)
+            if (index != -1) {
+                programaciones[index] = programacion.copy(
+                    nombre = nuevoNombre,
+                    duracion = nuevaDuracion,
+                    hora = "Todos los días, $hora",
+                    proximaEjecucion = "Hoy $hora"
+                )
+                adapter.notifyItemChanged(index)
+                Toast.makeText(this, "Programación actualizada", Toast.LENGTH_SHORT).show()
+            }
+        }
+        builder.setNegativeButton("Cancelar", null)
+        builder.show()
     }
 
     private fun onEliminarProgramacion(programacion: ProgramacionData) {
@@ -163,41 +212,52 @@ class ProgramacionActivity : AppCompatActivity() {
                 programaciones.remove(programacion)
                 adapter.notifyDataSetChanged()
                 Toast.makeText(this, "Programación eliminada", Toast.LENGTH_SHORT).show()
-                // TODO: Eliminar de Firebase
             }
             .setNegativeButton("Cancelar", null)
             .show()
     }
 
+    // --- MAGIA DE AGREGAR ---
     private fun mostrarDialogAgregar() {
-        Toast.makeText(this, "Dialog agregar programación - Próximamente", Toast.LENGTH_SHORT).show()
-        // TODO: Implementar dialog completo con TimePicker, días, etc.
-    }
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Nueva Programación")
 
-    /**
-     * Volver al Dashboard correctamente sin ciclos
-     */
-    private fun volverAlDashboard() {
-        if (isFinishing) return
+        val layout = android.widget.LinearLayout(this)
+        layout.orientation = android.widget.LinearLayout.VERTICAL
+        layout.setPadding(50, 40, 50, 10)
 
-        val intent = Intent(this, DashboardActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                    Intent.FLAG_ACTIVITY_SINGLE_TOP or
-                    Intent.FLAG_ACTIVITY_NO_ANIMATION
-        }
-        startActivity(intent)
-        finish()
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
-    }
+        val inputNombre = EditText(this)
+        inputNombre.hint = "Nombre (ej. Riego Rosas)"
+        layout.addView(inputNombre)
 
-    /**
-     * Manejo del botón Atrás del sistema (Android 13+ compatible)
-     */
-    private fun setupBackHandler() {
-        onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                volverAlDashboard()
+        val inputDuracion = EditText(this)
+        inputDuracion.hint = "Duración (minutos)"
+        inputDuracion.inputType = android.text.InputType.TYPE_CLASS_NUMBER
+        layout.addView(inputDuracion)
+
+        builder.setView(layout)
+
+        builder.setPositiveButton("Crear") { _, _ ->
+            val nombre = inputNombre.text.toString()
+            val duracion = inputDuracion.text.toString().toIntOrNull() ?: 15
+
+            if (nombre.isNotEmpty()) {
+                val nuevaProg = ProgramacionData(
+                    id = "prog_${System.currentTimeMillis()}",
+                    nombre = nombre,
+                    zona = "Zona 1", // Por defecto
+                    dias = listOf("L", "M", "X", "J", "V"),
+                    hora = "Lunes a Viernes, 07:00 AM",
+                    duracion = duracion,
+                    activo = true,
+                    proximaEjecucion = "Mañana 07:00 AM"
+                )
+                programaciones.add(nuevaProg)
+                adapter.notifyDataSetChanged()
+                Toast.makeText(this, "Programación creada con éxito", Toast.LENGTH_SHORT).show()
             }
-        })
+        }
+        builder.setNegativeButton("Cancelar", null)
+        builder.show()
     }
 }

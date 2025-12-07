@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/app/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@+id/action_share"
-        android:icon="@drawable/ic_share"
+        android:icon="@android:drawable/ic_menu_share"
         android:title="Compartir"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_location"
-        android:icon="@drawable/ic_location"
+        android:icon="@android:drawable/ic_menu_mylocation"
         android:title="Ubicación"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_profile"
-        android:icon="@drawable/ic_person"
+        android:icon="@android:drawable/ic_menu_my_calendar"
         android:title="Perfil"
         app:showAsAction="never" />
 

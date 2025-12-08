@@ -1085,6 +1085,18 @@ HortechIA-SmartRiego/
 - **Portabilidad**: Exportación de datos (GDPR Art. 20)
 - **Transparencia**: Información clara sobre recolección
 
+## ⚠️ Nota de Seguridad
+
+Este proyecto incluye `google-services.json` en el repositorio para
+facilitar la evaluación académica. La API Key está protegida mediante
+restricciones en Google Cloud Console:
+
+- Limitada al package name: `com.hortechia.smartriego`
+- Limitada al SHA-1 fingerprint del certificado de firma
+- Restringida a APIs de Firebase únicamente
+
+Para usar este proyecto, deberás crear tu propio proyecto Firebase.
+
 ### Cumplimiento de Estándares
 
 - ✅ **OWASP Mobile Top 10** (2024)

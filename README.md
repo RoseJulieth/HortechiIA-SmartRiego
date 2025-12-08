@@ -1244,7 +1244,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 ## 🙏 Agradecimientos
 
-- **Cristian Áraya** - Docente guía y asesor técnico
+- **Cristián Áraya Cortés** - Docente guía y asesor técnico
 - **Firebase Team** - Plataforma cloud gratuita
 - **Espressif Systems** - Documentación ESP32
 - **Material Design Team** - Sistema de diseño

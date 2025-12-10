@@ -1263,7 +1263,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 **Proyecto**: HortechIA SmartRiego  
 **Correo**: ros3juli3th@gmail.com
-**GitHub**: [https://github.com/RoseJulieth/HortechiIA-SmartRiego](https://github.com/RoseJulieth/HortechiIA-SmartRiego)
+**GitHub**: [https://github.com/RoseJulieth/HortechiIA-SmartRiego](https://github.com/RoseJulieth/HortechIA-SmartRiego)
 
 
 

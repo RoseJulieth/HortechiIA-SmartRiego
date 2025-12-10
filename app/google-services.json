@@ -15,14 +15,6 @@
       },
       "oauth_client": [
         {
-          "client_id": "169156003050-c0vm8gkdj3ohnvojpkb9icj2vlkodepk.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.hortechia.smartriego",
-            "certificate_hash": "a61570889a407b0bb5152862605dcc85f8ed2ebc"
-          }
-        },
-        {
           "client_id": "169156003050-i2v67tvbtusif9601vii2c1j0st175ma.apps.googleusercontent.com",
           "client_type": 3
         }

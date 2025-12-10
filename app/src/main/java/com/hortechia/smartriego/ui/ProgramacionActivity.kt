@@ -12,6 +12,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
 import com.hortechia.smartriego.adapter.ProgramacionAdapter
 import com.hortechia.smartriego.databinding.ActivityProgramacionBinding
 import com.hortechia.smartriego.models.ProgramacionData
@@ -26,39 +28,41 @@ class ProgramacionActivity : AppCompatActivity() {
     private lateinit var adapter: ProgramacionAdapter
     private val programaciones = mutableListOf<ProgramacionData>()
 
+    // Referencias Firebase
+    private lateinit var auth: FirebaseAuth
+    private lateinit var database: DatabaseReference
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // 1. Inflar el diseño que me enviaste
         binding = ActivityProgramacionBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 2. Configurar componentes
+        auth = FirebaseAuth.getInstance()
+        val userId = auth.currentUser?.uid
+        if (userId != null) {
+            database = FirebaseDatabase.getInstance().reference.child("users").child(userId).child("programacion")
+        } else {
+            Toast.makeText(this, "Error de sesión", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
         setupToolbar()
         setupRecyclerView()
-        loadProgramaciones()
+        loadProgramacionesFirebase() // Carga real
         setupListeners()
         setupBottomNavigation()
     }
 
     private fun setupToolbar() {
-        // La flecha atrás solo cierra esta pantalla para volver al Dashboard
-        binding.toolbar.setNavigationOnClickListener {
-            finish()
-        }
+        binding.toolbar.setNavigationOnClickListener { finish() }
     }
 
     private fun setupRecyclerView() {
         adapter = ProgramacionAdapter(
             programaciones = programaciones,
             onSwitchChanged = { programacion, isChecked ->
-                // Guardar estado (Simulado)
-                val index = programaciones.indexOf(programacion)
-                if (index != -1) {
-                    programaciones[index] = programacion.copy(activo = isChecked)
-                }
-                val estado = if (isChecked) "Activado" else "Desactivado"
-                Toast.makeText(this, "${programacion.nombre}: $estado", Toast.LENGTH_SHORT).show()
+                onProgramacionToggle(programacion, isChecked)
             },
             onEditClick = { programacion ->
                 onEditarProgramacion(programacion)
@@ -74,84 +78,122 @@ class ProgramacionActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadProgramaciones() {
-        // Datos Mock para la demo
-        programaciones.clear()
-        programaciones.addAll(
-            listOf(
-                ProgramacionData(
-                    id = "prog1",
-                    nombre = "Riego matutino tomates",
-                    zona = "Zona 1",
-                    dias = listOf("L", "M", "X", "J", "V"),
-                    hora = "Lunes a Viernes, 6:00 AM",
-                    duracion = 15,
-                    activo = true,
-                    proximaEjecucion = "Mañana 6:00 AM"
-                ),
-                ProgramacionData(
-                    id = "prog2",
-                    nombre = "Riego vespertino césped",
-                    zona = "Zona 2",
-                    dias = listOf("L", "M", "X", "J", "V", "S", "D"),
-                    hora = "Todos los días, 18:00",
-                    duracion = 10,
-                    activo = true,
-                    proximaEjecucion = "Hoy 18:00"
-                )
-            )
-        )
-        adapter.notifyDataSetChanged()
+    // --- CORRECCIÓN: Carga de datos reales ---
+    private fun loadProgramacionesFirebase() {
+        database.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                programaciones.clear()
+                for (data in snapshot.children) {
+                    val prog = data.getValue(ProgramacionData::class.java)
+                    if (prog != null) {
+                        programaciones.add(prog)
+                    }
+                }
+                adapter.notifyDataSetChanged()
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(applicationContext, "Error al cargar: ${error.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
     private fun setupListeners() {
-        // Tu FAB flotante
         binding.fabAgregar.setOnClickListener {
             mostrarDialogAgregar()
         }
 
-        // Tu Switch Inteligente
         binding.switchModoInteligente.setOnCheckedChangeListener { _, isChecked ->
+            // Aquí podrías guardar esta preferencia en Firebase también si quisieras
             if (isChecked) {
                 Toast.makeText(this, "🧠 Modo Inteligente ACTIVADO", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Modo Inteligente desactivado", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     private fun setupBottomNavigation() {
         binding.bottomNavigation.selectedItemId = R.id.nav_schedule
-
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home -> {
-                    // CORRECCIÓN CRÍTICA: finish() vuelve al Dashboard sin crear uno nuevo
-                    finish()
-                    true
-                }
-                R.id.nav_irrigation -> {
-                    startActivity(Intent(this, ControlManualActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_history -> {
-                    startActivity(Intent(this, HistorialActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_schedule -> true // Ya estamos aquí
-                R.id.nav_settings -> {
-                    startActivity(Intent(this, ConfiguracionActivity::class.java))
-                    finish()
-                    true
-                }
+                R.id.nav_home -> { finish(); true }
+                R.id.nav_irrigation -> { startActivity(Intent(this, ControlManualActivity::class.java)); finish(); true }
+                R.id.nav_history -> { startActivity(Intent(this, HistorialActivity::class.java)); finish(); true }
+                R.id.nav_schedule -> true
+                R.id.nav_settings -> { startActivity(Intent(this, ConfiguracionActivity::class.java)); finish(); true }
                 else -> false
             }
         }
     }
 
-    // --- LÓGICA DE DIÁLOGOS (Construidos aquí para evitar errores XML) ---
+    // --- ACCIONES EN LA NUBE ---
+
+    private fun onProgramacionToggle(programacion: ProgramacionData, isChecked: Boolean) {
+        // Actualizamos en Firebase
+        database.child(programacion.id).child("activo").setValue(isChecked)
+    }
+
+    private fun onEditarProgramacion(programacion: ProgramacionData) {
+        // Reutilizamos el diálogo pero con datos precargados
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Editar: ${programacion.nombre}")
+
+        val layout = LinearLayout(this)
+        layout.orientation = LinearLayout.VERTICAL
+        layout.setPadding(50, 40, 50, 10)
+
+        val inputNombre = EditText(this)
+        inputNombre.hint = "Nombre"
+        inputNombre.setText(programacion.nombre)
+        layout.addView(inputNombre)
+
+        val inputDuracion = EditText(this)
+        inputDuracion.hint = "Duración (min)"
+        inputDuracion.inputType = InputType.TYPE_CLASS_NUMBER
+        inputDuracion.setText(programacion.duracion.toString())
+        layout.addView(inputDuracion)
+
+        val timePicker = TimePicker(this)
+        timePicker.setIs24HourView(true)
+        // Setear hora actual del objeto si es posible (requiere parseo, simplificado aquí)
+        layout.addView(timePicker)
+
+        builder.setView(layout)
+
+        builder.setPositiveButton("Actualizar") { _, _ ->
+            val nuevoNombre = inputNombre.text.toString()
+            val nuevaDuracion = inputDuracion.text.toString().toIntOrNull() ?: 10
+            val horaStr = "${timePicker.hour}:${String.format("%02d", timePicker.minute)}"
+
+            if (nuevoNombre.isNotEmpty()) {
+                val progActualizada = programacion.copy(
+                    nombre = nuevoNombre,
+                    duracion = nuevaDuracion,
+                    hora = "Todos los días, $horaStr",
+                    proximaEjecucion = "Hoy $horaStr"
+                )
+                // Guardar cambios en Firebase
+                database.child(programacion.id).setValue(progActualizada)
+                    .addOnSuccessListener { Toast.makeText(this, "Actualizado", Toast.LENGTH_SHORT).show() }
+            }
+        }
+        builder.setNegativeButton("Cancelar", null)
+        builder.show()
+    }
+
+    private fun onEliminarProgramacion(programacion: ProgramacionData) {
+        AlertDialog.Builder(this)
+            .setTitle("Eliminar")
+            .setMessage("¿Estás seguro de eliminar '${programacion.nombre}'?")
+            .setPositiveButton("Sí") { _, _ ->
+                // Borrar de Firebase
+                database.child(programacion.id).removeValue()
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Eliminado correctamente", Toast.LENGTH_SHORT).show()
+                    }
+            }
+            .setNegativeButton("No", null)
+            .show()
+    }
 
     private fun mostrarDialogAgregar() {
         val builder = AlertDialog.Builder(this)
@@ -177,84 +219,25 @@ class ProgramacionActivity : AppCompatActivity() {
             val duracion = inputDuracion.text.toString().toIntOrNull() ?: 15
 
             if (nombre.isNotEmpty()) {
+                val id = database.push().key ?: return@setPositiveButton
+
                 val nuevaProg = ProgramacionData(
-                    id = "prog_${System.currentTimeMillis()}",
+                    id = id,
                     nombre = nombre,
                     zona = "Zona 1",
-                    dias = listOf("L", "M", "X", "J", "V"),
-                    hora = "Lunes a Viernes, 07:00 AM",
+                    dias = listOf("L", "M", "V"), // Por defecto
+                    hora = "08:00 AM", // Por defecto
                     duracion = duracion,
                     activo = true,
-                    proximaEjecucion = "Mañana 07:00 AM"
+                    proximaEjecucion = "Mañana 08:00 AM"
                 )
-                programaciones.add(nuevaProg)
-                adapter.notifyItemInserted(programaciones.size - 1)
-                Toast.makeText(this, "Programación creada", Toast.LENGTH_SHORT).show()
+
+                // Guardar en Firebase
+                database.child(id).setValue(nuevaProg)
+                    .addOnSuccessListener { Toast.makeText(this, "Creado", Toast.LENGTH_SHORT).show() }
             }
         }
         builder.setNegativeButton("Cancelar", null)
         builder.show()
-    }
-
-    private fun onEditarProgramacion(programacion: ProgramacionData) {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Editar: ${programacion.nombre}")
-
-        val layout = LinearLayout(this)
-        layout.orientation = LinearLayout.VERTICAL
-        layout.setPadding(50, 40, 50, 10)
-
-        val inputNombre = EditText(this)
-        inputNombre.hint = "Nombre"
-        inputNombre.setText(programacion.nombre)
-        layout.addView(inputNombre)
-
-        val inputDuracion = EditText(this)
-        inputDuracion.hint = "Duración (min)"
-        inputDuracion.inputType = InputType.TYPE_CLASS_NUMBER
-        inputDuracion.setText(programacion.duracion.toString())
-        layout.addView(inputDuracion)
-
-        val timePicker = TimePicker(this)
-        timePicker.setIs24HourView(true)
-        layout.addView(timePicker)
-
-        builder.setView(layout)
-
-        builder.setPositiveButton("Guardar") { _, _ ->
-            val nuevoNombre = inputNombre.text.toString()
-            val nuevaDuracion = inputDuracion.text.toString().toIntOrNull() ?: 10
-            val horaStr = "${timePicker.hour}:${String.format("%02d", timePicker.minute)}"
-
-            val index = programaciones.indexOf(programacion)
-            if (index != -1) {
-                programaciones[index] = programacion.copy(
-                    nombre = nuevoNombre,
-                    duracion = nuevaDuracion,
-                    hora = "Todos los días, $horaStr",
-                    proximaEjecucion = "Hoy $horaStr"
-                )
-                adapter.notifyItemChanged(index)
-                Toast.makeText(this, "Actualizado", Toast.LENGTH_SHORT).show()
-            }
-        }
-        builder.setNegativeButton("Cancelar", null)
-        builder.show()
-    }
-
-    private fun onEliminarProgramacion(programacion: ProgramacionData) {
-        AlertDialog.Builder(this)
-            .setTitle("Eliminar")
-            .setMessage("¿Estás seguro de eliminar '${programacion.nombre}'?")
-            .setPositiveButton("Sí") { _, _ ->
-                val index = programaciones.indexOf(programacion)
-                if (index != -1) {
-                    programaciones.removeAt(index)
-                    adapter.notifyItemRemoved(index)
-                    Toast.makeText(this, "Eliminado", Toast.LENGTH_SHORT).show()
-                }
-            }
-            .setNegativeButton("No", null)
-            .show()
     }
 }

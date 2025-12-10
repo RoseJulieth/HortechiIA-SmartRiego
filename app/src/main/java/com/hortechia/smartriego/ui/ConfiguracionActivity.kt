@@ -13,6 +13,7 @@ import com.hortechia.smartriego.databinding.ActivityConfiguracionBinding
 import com.hortechia.smartriego.ui.ControlManualActivity
 import com.hortechia.smartriego.ui.DashboardActivity
 import com.hortechia.smartriego.ui.LoginActivity
+import com.hortechia.smartriego.HistorialActivity
 
 class ConfiguracionActivity : AppCompatActivity() {
 
@@ -25,10 +26,7 @@ class ConfiguracionActivity : AppCompatActivity() {
         binding = ActivityConfiguracionBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Inicializar Firebase
         auth = FirebaseAuth.getInstance()
-
-        // Inicializar SharedPreferences
         sharedPreferences = getSharedPreferences("SmartRiegoPrefs", MODE_PRIVATE)
 
         setupToolbar()
@@ -40,9 +38,7 @@ class ConfiguracionActivity : AppCompatActivity() {
     }
 
     private fun setupToolbar() {
-        binding.toolbar.setNavigationOnClickListener {
-            finish()
-        }
+        binding.toolbar.setNavigationOnClickListener { finish() }
     }
 
     private fun loadUserData() {
@@ -53,7 +49,6 @@ class ConfiguracionActivity : AppCompatActivity() {
     }
 
     private fun loadPreferences() {
-        // Cargar preferencias guardadas
         binding.switchNotificaciones.isChecked = sharedPreferences.getBoolean("notificaciones_activas", true)
         binding.switchRiegosIniciados.isChecked = sharedPreferences.getBoolean("notif_riegos_iniciados", true)
         binding.switchRiegosCompletados.isChecked = sharedPreferences.getBoolean("notif_riegos_completados", true)
@@ -62,21 +57,17 @@ class ConfiguracionActivity : AppCompatActivity() {
         binding.tvHumedadMinima.text = "${sharedPreferences.getInt("umbral_minimo", 30)}%"
         binding.tvHumedadOptima.text = "${sharedPreferences.getInt("umbral_optimo_min", 60)}-${sharedPreferences.getInt("umbral_optimo_max", 70)}%"
 
-        // Cargar nombre del sistema
         val nombreSistema = sharedPreferences.getString("nombre_sistema", "Mi Jardín")
         binding.tvNombreSistema.text = nombreSistema
     }
 
     private fun setupListeners() {
-        // --- MI SISTEMA (AHORA EDITABLE) ---
         binding.layoutNombreSistema.setOnClickListener {
             val builder = AlertDialog.Builder(this)
             builder.setTitle("Nombre del Sistema")
-
             val input = EditText(this)
             input.setText(binding.tvNombreSistema.text)
             builder.setView(input)
-
             builder.setPositiveButton("Guardar") { _, _ ->
                 val nuevoNombre = input.text.toString()
                 if(nuevoNombre.isNotEmpty()){
@@ -89,7 +80,6 @@ class ConfiguracionActivity : AppCompatActivity() {
             builder.show()
         }
 
-// --- GESTIONAR DISPOSITIVOS ---
         binding.layoutDispositivos.setOnClickListener {
             AlertDialog.Builder(this)
                 .setTitle("Detalles del Dispositivo")
@@ -102,12 +92,10 @@ class ConfiguracionActivity : AppCompatActivity() {
                 .setNeutralButton("Reiniciar") { _, _ ->
                     Toast.makeText(this, "Reiniciando dispositivo...", Toast.LENGTH_LONG).show()
                 }
-                // CORRECCIÓN AQUÍ: Usamos un icono del sistema Android
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .show()
         }
 
-        // Notificaciones
         binding.switchNotificaciones.setOnCheckedChangeListener { _, isChecked ->
             savePreference("notificaciones_activas", isChecked)
             if (!isChecked) {
@@ -116,20 +104,16 @@ class ConfiguracionActivity : AppCompatActivity() {
                 binding.switchAlertasHumedad.isChecked = false
             }
         }
-        // ... (Resto de listeners igual)
         binding.switchRiegosIniciados.setOnCheckedChangeListener { _, isChecked -> savePreference("notif_riegos_iniciados", isChecked) }
         binding.switchRiegosCompletados.setOnCheckedChangeListener { _, isChecked -> savePreference("notif_riegos_completados", isChecked) }
         binding.switchAlertasHumedad.setOnCheckedChangeListener { _, isChecked -> savePreference("notif_alertas_humedad", isChecked) }
 
-        // Umbrales
         binding.layoutHumedadMinima.setOnClickListener { mostrarDialogHumedadMinima() }
         binding.layoutHumedadOptima.setOnClickListener { mostrarDialogHumedadOptima() }
 
-        // Cuenta
         binding.layoutCambiarPassword.setOnClickListener { cambiarPassword() }
         binding.layoutCerrarSesion.setOnClickListener { cerrarSesion() }
 
-        // Aplicación
         binding.layoutTema.setOnClickListener { Toast.makeText(this, "Tema automático (Sistema)", Toast.LENGTH_SHORT).show() }
         binding.layoutIdioma.setOnClickListener { Toast.makeText(this, "Idioma: Español (Chile)", Toast.LENGTH_SHORT).show() }
     }
@@ -139,31 +123,72 @@ class ConfiguracionActivity : AppCompatActivity() {
         binding.btnEliminarCuenta.setOnClickListener { eliminarCuenta() }
     }
 
+    // --- CORRECCIÓN: Lógica Real de Exportar ---
+    private fun exportarDatos() {
+        val user = auth.currentUser
+        val report = """
+            📋 REPORTE DE DATOS - SMARTRIGO
+            --------------------------------
+            Usuario: ${user?.email}
+            ID: ${user?.uid}
+            Fecha: ${java.util.Date()}
+            
+            Configuración:
+            - Notificaciones: ${if (binding.switchNotificaciones.isChecked) "Activas" else "Inactivas"}
+            - Humedad Mín: ${binding.tvHumedadMinima.text}
+            
+            Este archivo se genera conforme al derecho de portabilidad de datos.
+        """.trimIndent()
+
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_SUBJECT, "Mis Datos SmartRiego")
+            putExtra(Intent.EXTRA_TEXT, report)
+        }
+        startActivity(Intent.createChooser(intent, "Guardar o enviar reporte:"))
+    }
+
+    // --- CORRECCIÓN: Lógica Real de Eliminar ---
+    private fun eliminarCuenta() {
+        AlertDialog.Builder(this)
+            .setTitle("⚠️ Eliminar cuenta permanentemente")
+            .setMessage("Esta acción borrará todos tus datos, historial y configuraciones. No se puede deshacer. ¿Estás seguro?")
+            .setPositiveButton("SÍ, ELIMINAR") { _, _ ->
+                performDelete()
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    private fun performDelete() {
+        val user = auth.currentUser
+        val uid = user?.uid
+        if (uid != null) {
+            // 1. Borrar datos de Realtime Database
+            FirebaseDatabase.getInstance().reference.child("users").child(uid).removeValue()
+        }
+
+        // 2. Borrar usuario de Authentication
+        user?.delete()?.addOnSuccessListener {
+            Toast.makeText(this, "Cuenta eliminada correctamente", Toast.LENGTH_LONG).show()
+            sharedPreferences.edit().clear().apply()
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+        }?.addOnFailureListener { e ->
+            Toast.makeText(this, "Error: ${e.message}. Inicia sesión nuevamente para confirmar.", Toast.LENGTH_LONG).show()
+        }
+    }
+
     private fun setupBottomNavigation() {
         binding.bottomNavigation.selectedItemId = R.id.nav_settings
-
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home -> {
-                    startActivity(Intent(this, DashboardActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_irrigation -> {
-                    startActivity(Intent(this, ControlManualActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_history -> {
-                    startActivity(Intent(this, HistorialActivity::class.java))
-                    finish()
-                    true
-                }
-                R.id.nav_schedule -> {
-                    startActivity(Intent(this, ProgramacionActivity::class.java))
-                    finish()
-                    true
-                }
+                R.id.nav_home -> { startActivity(Intent(this, DashboardActivity::class.java)); finish(); true }
+                R.id.nav_irrigation -> { startActivity(Intent(this, ControlManualActivity::class.java)); finish(); true }
+                R.id.nav_history -> { startActivity(Intent(this, HistorialActivity::class.java)); finish(); true }
+                R.id.nav_schedule -> { startActivity(Intent(this, ProgramacionActivity::class.java)); finish(); true }
                 R.id.nav_settings -> true
                 else -> false
             }
@@ -251,14 +276,5 @@ class ConfiguracionActivity : AppCompatActivity() {
             }
             .setNegativeButton("Cancelar", null)
             .show()
-    }
-
-    private fun eliminarCuenta() {
-        // Implementación simplificada para este paso
-        Toast.makeText(this, "Esta acción requiere confirmación adicional", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun exportarDatos() {
-        Toast.makeText(this, "Generando archivo CSV...", Toast.LENGTH_SHORT).show()
     }
 }

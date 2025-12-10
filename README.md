@@ -1222,6 +1222,12 @@ int humedad = map(analogRead(pin), 4095, 1200, 0, 100);
 - [ ] Dashboard web (React)
 - [ ] Integración con Google Assistant
 
+## 🆕 Últimas Actualizaciones (v2.0 - Release Candidate)
+
+* ✅ **Corrección de Lógica:** Sistema de recuperación de contraseña vía correo totalmente funcional.
+* ✅ **Privacidad Activa:** Implementación real de los botones "Exportar Datos" y "Eliminar Cuenta" (cumplimiento GDPR).
+* ✅ **Persistencia:** La programación automática ahora se sincroniza en tiempo real con la nube y persiste entre sesiones.
+
 ---
 
 ## 👥 Autores
